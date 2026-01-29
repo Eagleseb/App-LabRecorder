@@ -6,6 +6,26 @@
 namespace py = pybind11;
 
 namespace {
+lsl::stream_info refresh_stream_info(const lsl::stream_info &info) {
+	if (!info.uid().empty()) {
+		auto results = lsl::resolve_stream("uid", info.uid(), 1, 1.0);
+		if (!results.empty())
+			return results.front();
+	}
+	if (!info.source_id().empty()) {
+		auto results = lsl::resolve_stream("source_id", info.source_id(), 1, 1.0);
+		if (!results.empty())
+			return results.front();
+	}
+	if (!info.name().empty() && !info.type().empty()) {
+		std::string query = "name='" + info.name() + "' and type='" + info.type() + "'";
+		auto results = lsl::resolve_stream(query, 1, 1.0);
+		if (!results.empty())
+			return results.front();
+	}
+	return info;
+}
+
 std::vector<lsl::stream_info> parse_stream_infos(const py::iterable &items) {
 	std::vector<lsl::stream_info> infos;
 	for (py::handle item : items) {
@@ -18,7 +38,8 @@ std::vector<lsl::stream_info> parse_stream_infos(const py::iterable &items) {
 				throw py::type_error("streams must be XML strings or objects with as_xml()");
 			xml = py::cast<std::string>(obj.attr("as_xml")());
 		}
-		infos.emplace_back(lsl::stream_info::from_xml(xml));
+		auto info = lsl::stream_info::from_xml(xml);
+		infos.emplace_back(refresh_stream_info(info));
 	}
 	return infos;
 }
