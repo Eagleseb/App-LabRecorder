@@ -26,6 +26,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # Build Options
 # =============================================================================
 option(LABRECORDER_BUILD_GUI "Build the GUI application (requires Qt6)" ON)
+option(LABRECORDER_BUILD_PYTHON "Build Python bindings (requires pybind11)" OFF)
 
 # =============================================================================
 # LSL Discovery Options
@@ -171,6 +172,26 @@ LSL_configure_rpath()
 
 # xdfwriter library
 add_subdirectory(xdfwriter)
+
+# Python bindings
+if(LABRECORDER_BUILD_PYTHON)
+    find_package(pybind11 CONFIG REQUIRED)
+
+    pybind11_add_module(labrecorder MODULE
+        src/pyrecording.cpp
+        src/recording.cpp
+    )
+    target_link_libraries(labrecorder PRIVATE
+        xdfwriter
+        Threads::Threads
+        LSL::lsl
+    )
+    install(TARGETS labrecorder
+        LIBRARY DESTINATION "."
+        RUNTIME DESTINATION "."
+        ARCHIVE DESTINATION "."
+    )
+endif()
 
 # GUI application
 if(LABRECORDER_BUILD_GUI)

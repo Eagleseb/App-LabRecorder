@@ -1,0 +1,19 @@
+[build-system]
+requires = ["scikit-build-core>=0.9", "pybind11>=2.10"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "labrecorder"
+version = "1.17.0"
+description = "Python bindings for LabRecorder recording"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [{name = "LabStreamingLayer Developers"}]
+
+[tool.scikit-build]
+cmake.version = ">=3.28"
+cmake.args = [
+  "-DLABRECORDER_BUILD_PYTHON=ON",
+  "-DLABRECORDER_BUILD_GUI=OFF"
+]

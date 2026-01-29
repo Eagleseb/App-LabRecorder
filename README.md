@@ -25,6 +25,7 @@ If you suspect you are missing a dependency, try running [DependenciesGui.exe](h
 ### MacOS
 
 In the near future, many LSL Apps (especially LabRecorder) will not ship with their dependencies and will look for the dependencies to be installed on the system. The easiest way to manage the dependencies is by using [homebrew](https://brew.sh/):
+
 * Install homebrew: `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`
 * `brew install labstreaminglayer/tap/lsl`
 * `brew install qt`
@@ -36,6 +37,7 @@ Run it with `open /usr/local/opt/labrecorder/LabRecorder/LabRecorder.app`
 ### Linux Ubuntu
 
 The Ubuntu releases do not typically ship with their dependencies, so you must download and install those:
+
 * Download, extract, and install the latest [liblsl-{version}-{target}_amd64.deb from its release page](https://github.com/sccn/liblsl/releases)
     * We hope to make this available via a package manager soon.
       * Quick ref Ubuntu 24.04: `curl -L https://github.com/sccn/liblsl/releases/download/v1.17.4/liblsl-1.17.4-noble_amd64.deb -o liblsl.deb`
@@ -85,6 +87,7 @@ Since it is too easy to forget to turn on or check all necessary recording devic
 If you check the box to EnableRCS then LabRecorder exposes some rudimentary controls via TCP socket.
 
 Currently supported commands include:
+
 * `select all`
 * `select none`
 * `start`
@@ -93,6 +96,7 @@ Currently supported commands include:
 * `filename ...`
 
 `filename` is followed by a series of space-delimited options enclosed in curly braces. e.g. {root:C:\root_data_dir}
+
 * `root` - Sets the root data directory.
 * `template` - sets the File Name / Template. Will unselect BIDS option. May contain wildcards.
 * `task` - will replace %b in template
@@ -139,3 +143,42 @@ If a device is displayed in red when you start recording (and it is checked), it
 # Build Instructions
 
 Please follow the general [LSL App build instructions](https://labstreaminglayer.readthedocs.io/dev/app_build.html).
+
+## Python bindings
+
+LabRecorder includes optional Python bindings for the `recording` class (module name: `labrecorder`).
+Enable them with `-DLABRECORDER_BUILD_PYTHON=ON` and make sure `pybind11` is installed on your system.
+
+### Install pybind11
+
+* macOS (Homebrew): `brew install pybind11`
+* Ubuntu/Debian: `sudo apt-get install pybind11-dev`
+* Windows: use vcpkg (`vcpkg install pybind11`) or a pybind11 CMake package on your PATH
+
+### Configure + build
+
+```bash
+cmake -S . -B build -DLABRECORDER_BUILD_PYTHON=ON
+cmake --build build --target labrecorder
+```
+
+### Usage (with pylsl)
+
+```python
+import sys
+from pylsl import resolve_streams
+
+sys.path.append("build")
+import labrecorder
+
+streams = resolve_streams()
+with labrecorder.Recording("out.xdf", streams):
+    input("Recording... press Enter to stop\n")
+```
+
+### Publish to PyPI
+
+```bash
+uv build
+uv publish
+```
